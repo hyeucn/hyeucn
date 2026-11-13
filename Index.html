@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body {
+        font-family: 'Malgun Gothic', sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #333;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      input[type="text"], textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      textarea {
+        resize: vertical;
+        height: 100px;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      #statusMessage {
+        margin-top: 15px;
+        text-align: center;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>탐구보고서 제출</h2>
+      
+      <form id="reportForm" onsubmit="handleFormSubmit(event)">
+        
+        <div class="form-group">
+          <label for="studentId">학번</label>
+          <input type="text" id="studentId" name="studentId" placeholder="예: 20401" required>
+        </div>
+
+        <div class="form-group">
+          <label for="studentName">이름</label>
+          <input type="text" id="studentName" name="studentName" placeholder="홍길동" required>
+        </div>
+
+        <div class="form-group">
+          <label for="topic">탐구 주제</label>
+          <input type="text" id="topic" name="topic" required>
+        </div>
+
+        <div class="form-group">
+          <label for="motivation">탐구 동기</label>
+          <textarea id="motivation" name="motivation" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="method">탐구 방법</label>
+          <textarea id="method" name="method" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="result">탐구 결과</label>
+          <textarea id="result" name="result" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="conclusion">결론 및 느낀 점</label>
+          <textarea id="conclusion" name="conclusion" required></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn">제출하기</button>
+      </form>
+
+      <div id="statusMessage"></div>
+    </div>
+
+    <script>
+      function handleFormSubmit(event) {
+        event.preventDefault(); // 페이지 새로고침 방지
+        
+        var btn = document.getElementById('submitBtn');
+        var status = document.getElementById('statusMessage');
+        var form = document.getElementById('reportForm');
+        
+        btn.disabled = true;
+        btn.innerText = '제출 중...';
+        status.innerText = '';
+        status.style.color = 'black';
+
+        // 폼 데이터를 객체로 변환
+        var formObject = {
+          studentId: form.studentId.value,
+          studentName: form.studentName.value,
+          topic: form.topic.value,
+          motivation: form.motivation.value,
+          method: form.method.value,
+          result: form.result.value,
+          conclusion: form.conclusion.value
+        };
+
+        // Code.gs의 submitReport 함수 호출
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if (response === 'success') {
+              status.innerText = '성공적으로 제출되었습니다!';
+              status.style.color = 'green';
+              form.reset(); // 폼 초기화
+            } else {
+              status.innerText = '오류 발생: ' + response;
+              status.style.color = 'red';
+            }
+            btn.disabled = false;
+            btn.innerText = '제출하기';
+          })
+          .withFailureHandler(function(error) {
+            status.innerText = '서버 통신 오류가 발생했습니다.';
+            status.style.color = 'red';
+            btn.disabled = false;
+            btn.innerText = '제출하기';
+          })
+          .submitReport(formObject);
+      }
+    </script>
+  </body>
+</html>
